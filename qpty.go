@@ -2,7 +2,6 @@ package qpty
 
 import (
 	"context"
-	"encoding/hex"
 	"github.com/creack/pty"
 	"github.com/fsouza/go-dockerclient"
 	"io"
@@ -64,14 +63,6 @@ func (q *Qpty) Run(shell string) error {
 
 	go func() {
 		_, _ = io.Copy(q.tty, q.or)
-	}()
-
-	go func() {
-		r, w := io.Pipe()
-		go func() {
-			_, _ = io.Copy(hex.NewEncoder(w), q.pty)
-		}()
-		_, _ = io.Copy(os.Stdout, r)
 	}()
 
 	return q.dock.StartExec(execInst.ID, docker.StartExecOptions{
