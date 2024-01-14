@@ -25,27 +25,23 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	machine := qpty.New(client, containerId)
+	proc, err := qpty.New(client, containerId, &pty.Winsize{Rows: 14, Cols: 11})
 	if err != nil {
 		log.Fatal(err)
-	}
-	exec, err := machine.Exec(&pty.Winsize{Rows: 14, Cols: 11})
-	if err != nil {
-		return
 	}
 
 	go func() {
 		time.Sleep(5 * time.Second)
-		milliType(exec, []byte(cmd+"\n"), 500*time.Millisecond)
+		milliType(proc, []byte(cmd+"\n"), 500*time.Millisecond)
 	}()
 
-	err = exec.Run(shell)
+	err = proc.Run(shell)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func milliType(exec *qpty.Exec, p []byte, gap time.Duration) {
+func milliType(exec *qpty.Qpty, p []byte, gap time.Duration) {
 	for _, i := range p {
 		exec.Send([]byte{i})
 		time.Sleep(gap)
